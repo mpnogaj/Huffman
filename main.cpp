@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "argsParser.h"
+#include "huffman_tree.h"
 
 class option
 {
@@ -24,10 +25,7 @@ public:
 	const std::string& get_description() const { return this->description_; }
 	std::function<void(int&)> get_function() const { return this->function_; }
 
-	bool matches(const std::string& candidate) const
-	{
-		return this->get_long_name() == candidate || this->get_short_name() == candidate;
-	}
+	bool matches(const std::string& candidate) const { return this->get_long_name() == candidate || this->get_short_name() == candidate; }
 };
 
 static void invalid_usage(const std::string& program_name)
@@ -95,6 +93,23 @@ int main(int argc, char* argv[])
 		invalid_usage(program_name);
 
 	auto program_opt = program_options(input_file, output_file, mode);
+
+	std::unordered_map<uint8_t, uint64_t> chMap;
+	chMap['B'] = 1;
+	chMap['C'] = 6;
+	chMap['A'] = 5;
+	chMap['D'] = 3;
+
+	auto* tree = new huffman_tree(std::unordered_map<uint8_t, uint64_t>{
+		{'B', 1},
+		{'C', 6},
+		{'A', 5},
+		{'D', 3}
+	});
+
+	auto x = tree->calculate_codes();
+
+	delete tree;
 
 	return EXIT_SUCCESS;
 }
