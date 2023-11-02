@@ -3,36 +3,51 @@
 #include <queue>
 #include <utility>
 
-static void delete_tree(const huffman_node* root);
-static void fill_codes(huffman_node* root, std::unordered_map<uint8_t, std::vector<bool>>& codes, std::vector<bool> current);
+static void delete_tree(const huffman_node *root);
+static void fill_codes(huffman_node *root, std::unordered_map<uint8_t, std::vector<bool>>& codes,
+                       std::vector<bool> current);
 
 
 huffman_tree::huffman_tree(std::unordered_map<uint8_t, uint64_t> chars_freq) : chars_freq_(std::move(chars_freq))
 {
-	std::priority_queue<std::pair<uint64_t, uint8_t>, std::vector<std::pair<uint64_t, uint8_t>>, std::greater<>> pq;
+	//https://stackoverflow.com/a/5808171
+	//min heap comparator
+	auto comp = [](huffman_node *n1, huffman_node *n2) {
+		const uint64_t freq1 = n1->get_frequency();
+		const uint64_t freq2 = n2->get_frequency();
+		const huffman_leaf *leaf1 = nullptr, *leaf2 = nullptr;
+		//if booth of nodes have equal frequency and are leafs, choose one with smaller value
+		if (freq1 == freq2 && (leaf1 = dynamic_cast<huffman_leaf*>(n1)) != nullptr && (leaf2 = dynamic_cast<huffman_leaf
+			*>(n2)) != nullptr)
+		{
+			return leaf1->get_value() > leaf2->get_value();
+		}
+
+		return freq1 > freq2;
+	};
+	std::priority_queue<huffman_node*, std::vector<huffman_node*>, decltype(comp)> pq(comp);
+
 	for (const auto& [chr, freq] : this->chars_freq_)
 	{
-		pq.push({ freq, chr });
+		pq.push(new huffman_leaf(freq, chr));
 	}
 
-	while (!pq.empty())
+	while (pq.size() > 1)
 	{
-		const auto& [frq, chr] = pq.top();
-		if (tree_root_ == nullptr)
-		{
-			tree_root_ = new huffman_leaf(frq, chr);
-		}
-		else
-		{
-			auto* new_node = new huffman_leaf(frq, chr);
-			huffman_node* l_child = new_node, * r_child = tree_root_;
-			if (l_child->get_frequency() > r_child->get_frequency())
-				std::swap(l_child, r_child);
-
-			tree_root_ = new huffman_node(l_child->get_frequency() + r_child->get_frequency(), l_child, r_child);
-		}
+		auto node1 = pq.top();
 		pq.pop();
+		auto node2 = pq.top();
+		pq.pop();
+
+		if (node1->get_frequency() > node2->get_frequency())
+			std::swap(node1, node2);
+
+		auto parent = new huffman_node(node1->get_frequency() + node2->get_frequency(), node1, node2);
+		pq.push(parent);
 	}
+
+	tree_root_ = pq.top();
+	pq.pop();
 }
 
 huffman_tree::~huffman_tree()
@@ -47,9 +62,10 @@ std::unordered_map<uint8_t, std::vector<bool>> huffman_tree::calculate_codes() c
 	return codes;
 }
 
-static void fill_codes(huffman_node *root, std::unordered_map<uint8_t, std::vector<bool>>& codes, std::vector<bool> current)
+static void fill_codes(huffman_node *root, std::unordered_map<uint8_t, std::vector<bool>>& codes,
+                       std::vector<bool> current)
 {
-	if(auto leaf = dynamic_cast<huffman_leaf*>(root))
+	if (auto leaf = dynamic_cast<huffman_leaf*>(root))
 	{
 		codes[leaf->get_value()] = std::move(current);
 		return;
@@ -71,4 +87,3 @@ static void delete_tree(const huffman_node *root)
 	if (root->get_right_child() != nullptr) delete_tree(root->get_right_child());
 	delete root;
 }
-

@@ -13,11 +13,13 @@ private:
 	const std::string description_;
 
 	std::function<void(int&)> function_;
-public:
-	option(std::string short_name, std::string long_name, std::string description, std::function<void(int&)> function) : short_name_(std::move(short_name)), long_name_(std::move(long_name)), description_(std::move(description)), function_(
-		std::move(function))
-	{
 
+public:
+	option(std::string short_name, std::string long_name, std::string description, std::function<void(int&)> function) :
+		short_name_(std::move(short_name)), long_name_(std::move(long_name)), description_(std::move(description)),
+		function_(
+			std::move(function))
+	{
 	}
 
 	const std::string& get_short_name() const { return this->short_name_; }
@@ -25,7 +27,10 @@ public:
 	const std::string& get_description() const { return this->description_; }
 	std::function<void(int&)> get_function() const { return this->function_; }
 
-	bool matches(const std::string& candidate) const { return this->get_long_name() == candidate || this->get_short_name() == candidate; }
+	bool matches(const std::string& candidate) const
+	{
+		return this->get_long_name() == candidate || this->get_short_name() == candidate;
+	}
 };
 
 static void invalid_usage(const std::string& program_name)
@@ -40,48 +45,46 @@ static void app_error(const std::string& msg)
 	exit(EXIT_FAILURE);
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
 	const std::string program_name = argv[0];
 	std::string input_file, output_file;
 	auto mode = mode::INVALID;
 
-	std::vector<option> options {
-		option("-h", "--help", "Prints help", [program_name, &options](int& i)
-		{
-			std::cout << "Running: " << program_name << " [OPTIONS] " << mode_compress << "|" << mode_decompress << std::endl;
+	std::vector<option> options{
+		option("-h", "--help", "Prints help", [program_name, &options](int& i) {
+			std::cout << "Running: " << program_name << " [OPTIONS] " << mode_compress << "|" << mode_decompress <<
+				std::endl;
 			std::cout << "Options: " << std::endl;
 			for (const auto& option : options)
-				std::cout << "  " << option.get_short_name() << ", " << option.get_long_name() << " - " << option.get_description() << std::endl;
+				std::cout << "  " << option.get_short_name() << ", " << option.get_long_name() << " - " << option.
+					get_description() << std::endl;
 			exit(EXIT_SUCCESS);
 		}),
-		option("-i", "--input-file", "Input file path [required]", [argc, argv, &input_file](int& i)
-		{
+		option("-i", "--input-file", "Input file path [required]", [argc, argv, &input_file](int& i) {
 			if (i + 1 >= argc)
 				app_error("Input file not specified");
 			input_file = std::string(argv[i + 1]);
 			i++;
 		}),
-		option("-o", "--output-file", "Output file path [required]", [argc, argv, &output_file](int& i)
-		{
+		option("-o", "--output-file", "Output file path [required]", [argc, argv, &output_file](int& i) {
 			if (i + 1 >= argc)
 				app_error("Output file not specified");
 			output_file = std::string(argv[i + 1]);
 			i++;
 		}),
-		option("-m", "--mode", "Compression algorithm mode [required]", [argc, argv, &mode](int &i)
-		{
-				if (i + 1 >= argc)
-					app_error("Mode not specified");
-				if (argv[i + 1] == mode_compress)
-					mode = mode::COMPRESS;
-				else if (argv[i + 1] == mode_decompress)
-					mode = mode::DECOMPRESS;
-				i++;
+		option("-m", "--mode", "Compression algorithm mode [required]", [argc, argv, &mode](int& i) {
+			if (i + 1 >= argc)
+				app_error("Mode not specified");
+			if (argv[i + 1] == mode_compress)
+				mode = mode::COMPRESS;
+			else if (argv[i + 1] == mode_decompress)
+				mode = mode::DECOMPRESS;
+			i++;
 		})
 	};
 
-	if (argc < 2)
+	/*if (argc < 2)
 		invalid_usage(program_name);
 
 	for (int i = 1; i < argc; i++)
@@ -92,7 +95,7 @@ int main(int argc, char* argv[])
 	if (mode == mode::INVALID)
 		invalid_usage(program_name);
 
-	auto program_opt = program_options(input_file, output_file, mode);
+	auto program_opt = program_options(input_file, output_file, mode);*/
 
 	std::unordered_map<uint8_t, uint64_t> chMap;
 	chMap['B'] = 1;
@@ -100,10 +103,10 @@ int main(int argc, char* argv[])
 	chMap['A'] = 5;
 	chMap['D'] = 3;
 
-	auto* tree = new huffman_tree(std::unordered_map<uint8_t, uint64_t>{
+	auto *tree = new huffman_tree(std::unordered_map<uint8_t, uint64_t>{
+		{'A', 1},
 		{'B', 1},
 		{'C', 6},
-		{'A', 5},
 		{'D', 3}
 	});
 
