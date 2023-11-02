@@ -5,6 +5,7 @@
 
 #include "argsParser.h"
 #include "huffman_tree.h"
+#include "huffman_encoder.h"
 
 class option
 {
@@ -93,26 +94,13 @@ int main(int argc, char *argv[])
 				option.get_function()(i);
 
 	if (mode == mode::INVALID)
-		invalid_usage(program_name);
+		invalid_usage(program_name);*/
 
-	auto program_opt = program_options(input_file, output_file, mode);*/
+	auto program_opt = program_options("data.txt", "output.txt", mode::COMPRESS);
 
-	std::unordered_map<uint8_t, uint64_t> chMap;
-	chMap['B'] = 1;
-	chMap['C'] = 6;
-	chMap['A'] = 5;
-	chMap['D'] = 3;
+	auto encoder = huffman_encoder(program_opt);
 
-	auto *tree = new huffman_tree(std::unordered_map<uint8_t, uint64_t>{
-		{'A', 1},
-		{'B', 1},
-		{'C', 6},
-		{'D', 3}
-	});
-
-	auto x = tree->calculate_codes();
-
-	delete tree;
+	encoder.compress_file();
 
 	return EXIT_SUCCESS;
 }

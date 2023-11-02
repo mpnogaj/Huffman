@@ -21,12 +21,18 @@
     <ClCompile Include="huffman_tree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="huffman_encoder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="argsParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="huffman_tree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="huffman_encoder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
