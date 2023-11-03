@@ -4,8 +4,6 @@
 #include <utility>
 
 static void delete_tree(const huffman_node *root);
-static void fill_codes(huffman_node *root, std::unordered_map<uint8_t, std::vector<bool>>& codes,
-                       std::vector<bool> current);
 static huffman_leaf* get_left_most_leaf(huffman_node* node);
 
 
@@ -66,18 +64,15 @@ huffman_tree::huffman_tree(const freq_map& chars_freq) : chars_freq_(chars_freq)
 
 	tree_root_ = pq.top();
 	pq.pop();
+
+	codes_ = new std::vector<uint8_t>[UINT8_MAX + 1];
+	fill_codes(this->tree_root_, {});
 }
 
 huffman_tree::~huffman_tree()
 {
 	delete_tree(this->tree_root_);
-}
-
-std::unordered_map<uint8_t, std::vector<bool>> huffman_tree::calculate_codes() const
-{
-	std::unordered_map<uint8_t, std::vector<bool>> codes;
-	fill_codes(this->tree_root_, codes, {});
-	return codes;
+	delete[] codes_;
 }
 
 bool huffman_tree::try_get_byte(uint8_t& byte, uint8_t code_bit) const
@@ -97,20 +92,19 @@ bool huffman_tree::try_get_byte(uint8_t& byte, uint8_t code_bit) const
 	return false;
 }
 
-static void fill_codes(huffman_node *root, std::unordered_map<uint8_t, std::vector<bool>>& codes,
-                       std::vector<bool> current)
+void huffman_tree::fill_codes(huffman_node *root, std::vector<uint8_t> current)
 {
-	if (auto leaf = dynamic_cast<huffman_leaf*>(root))
+	if (const auto leaf = dynamic_cast<huffman_leaf*>(root))
 	{
-		codes[leaf->get_value()] = std::move(current);
+		this->codes_[leaf->get_value()] = std::move(current);
 		return;
 	}
 
-	auto cpy = std::vector<bool>(current);
-	current.push_back(false);
-	fill_codes(root->get_left_child(), codes, current);
-	cpy.push_back(true);
-	fill_codes(root->get_right_child(), codes, cpy);
+	auto cpy = std::vector<uint8_t>(current);
+	current.push_back(0);
+	fill_codes(root->get_left_child(), current);
+	cpy.push_back(1);
+	fill_codes(root->get_right_child(), cpy);
 }
 
 static void delete_tree(const huffman_node *root)

@@ -58,11 +58,14 @@ class huffman_tree
 private:
 	huffman_node* tree_root_ = nullptr;
 	const freq_map& chars_freq_;
+	std::vector<uint8_t> *codes_;
+	void fill_codes(huffman_node* root, std::vector<uint8_t> current);
+
 public:
 	huffman_tree(const freq_map& chars_freq);
 	~huffman_tree();
 
-	std::unordered_map<uint8_t, std::vector<bool>> calculate_codes() const;
+	const std::vector<uint8_t>* get_codes() const { return this->codes_; }
 	bool try_get_byte(uint8_t &byte, uint8_t code_bit) const;
 };
 

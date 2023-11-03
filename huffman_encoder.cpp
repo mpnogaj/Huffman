@@ -44,7 +44,7 @@ void huffman_encoder::compress_file()
 
 	std::cout << "Building huffman tree..." << std::endl;
 	const huffman_tree *tree = new huffman_tree(map);
-	auto codes = tree->calculate_codes();
+	auto codes = tree->get_codes();
 
 	uint8_t padding = 0;
 
@@ -67,10 +67,10 @@ void huffman_encoder::compress_file()
 		for (size_t i = 0; i < this->buffer_cnt_; i++)
 		{
 			uint8_t byte = this->buffer_[i];
-			auto code = codes[byte];
+			auto& code = codes[byte];
 			for (bool bit : code)
 			{
-				output_file_bit_io.write_bit(bit ? 1 : 0);
+				output_file_bit_io.write_bit(bit);
 			}
 		}
 	}
@@ -93,8 +93,6 @@ void huffman_encoder::decompress_file()
 	bit_file_io input_file_bit_io(input_file, size_16_mb, 1);
 
 	const auto tree = read_file_header(input_file);
-	auto codes = tree->calculate_codes();
-
 
 	uint8_t bit = 0, byte = 0;
 	while (input_file_bit_io.read_bit(bit))
