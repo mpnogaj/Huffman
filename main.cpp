@@ -96,16 +96,15 @@ int main(int argc, char *argv[])
 	if (mode == mode::INVALID)
 		invalid_usage(program_name);*/
 
-	auto program_opt = program_options("data.txt", "compress.txt", mode::COMPRESS);
+	mode = mode::DECOMPRESS;
 
+	auto program_opt2 = program_options("vid.mp4", "out.mp4", mode::COMPRESS);
+	auto program_opt = program_options("out.mp4", "res.mp4", mode::COMPRESS);
 	auto encoder = huffman_encoder(program_opt);
-
-	encoder.compress_file();
-
-	auto program_opt2 = program_options("compress.txt", "decompress.txt", mode::DECOMPRESS);
-
 	auto encoder2 = huffman_encoder(program_opt2);
-	encoder2.decompress_file();
+
+	encoder2.compress_file();
+	encoder.decompress_file();
 
 	return EXIT_SUCCESS;
 }

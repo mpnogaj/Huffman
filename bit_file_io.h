@@ -12,7 +12,7 @@ public:
 	bit_file_io(std::fstream &file_stream) : file_stream_(file_stream) {  }
 
 	void write_bit(uint8_t bit);
-	void flush_bit_buffer();
+	uint8_t flush_bit_buffer();
 
 	bool read_bit(uint8_t &bit);
 };
