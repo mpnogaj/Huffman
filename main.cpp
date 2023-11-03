@@ -98,8 +98,8 @@ int main(int argc, char *argv[])
 
 	mode = mode::DECOMPRESS;
 
-	auto program_opt2 = program_options("vid.mp4", "out.mp4", mode::COMPRESS);
-	auto program_opt = program_options("out.mp4", "res.mp4", mode::COMPRESS);
+	auto program_opt2 = program_options("data.txt", "out.txt", mode::COMPRESS);
+	auto program_opt = program_options("out.txt", "res.txt", mode::COMPRESS);
 	auto encoder = huffman_encoder(program_opt);
 	auto encoder2 = huffman_encoder(program_opt2);
 

@@ -8,24 +8,19 @@
 class freq_map
 {
 private:
-	uint64_t * const freq_;
+	std::vector<uint64_t> freq_;
 
 public:
-	freq_map(): freq_(new uint64_t[UINT8_MAX + 1])
-	{
-		std::fill(freq_, freq_ + UINT8_MAX + 1, 0);
-	};
-
-	~freq_map() { delete freq_; }
+	freq_map(): freq_(std::vector<uint64_t>(UINT8_MAX + 1, 0)) {}
 
 	uint64_t get(uint8_t byte) const { return freq_[byte]; }
-	void set(uint8_t byte, uint64_t value) const {freq_[byte] = value; }
-	void inc(uint8_t byte) const { ++freq_[byte]; }
+	void set(uint8_t byte, uint64_t value) {freq_[byte] = value; }
+	void inc(uint8_t byte) { ++freq_[byte]; }
 
 	uint16_t size() const
 	{
 		uint16_t cnt = 0;
-		for(uint8_t i = 0; i <= UINT8_MAX; i++)
+		for(uint16_t i = 0; i <= UINT8_MAX; i++)
 			if(freq_[i])
 				cnt++;
 		return cnt;
@@ -62,9 +57,9 @@ class huffman_tree
 {
 private:
 	huffman_node* tree_root_ = nullptr;
-	const freq_map chars_freq_;
+	const freq_map& chars_freq_;
 public:
-	huffman_tree(freq_map chars_freq);
+	huffman_tree(const freq_map& chars_freq);
 	~huffman_tree();
 
 	std::unordered_map<uint8_t, std::vector<bool>> calculate_codes() const;

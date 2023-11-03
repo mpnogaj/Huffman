@@ -136,6 +136,7 @@
   <ItemGroup>
     <ClInclude Include="argsParser.h" />
     <ClInclude Include="bit_file_io.h" />
+    <ClInclude Include="consts.h" />
     <ClInclude Include="huffman_encoder.h" />
     <ClInclude Include="huffman_tree.h" />
   </ItemGroup>

@@ -9,7 +9,7 @@ static void fill_codes(huffman_node *root, std::unordered_map<uint8_t, std::vect
 static huffman_leaf* get_left_most_leaf(huffman_node* node);
 
 
-huffman_tree::huffman_tree(freq_map chars_freq) : chars_freq_(std::move(chars_freq))
+huffman_tree::huffman_tree(const freq_map& chars_freq) : chars_freq_(chars_freq)
 {
 	//https://stackoverflow.com/a/5808171
 	//min heap comparator
@@ -41,9 +41,10 @@ huffman_tree::huffman_tree(freq_map chars_freq) : chars_freq_(std::move(chars_fr
 	};
 	std::priority_queue<huffman_node*, std::vector<huffman_node*>, decltype(comp)> pq(comp);
 
-	for (uint8_t chr = 0; chr <= UINT8_MAX; chr++)
-		if(uint64_t freq = this->chars_freq_.get(chr))
+	for (uint16_t chr = 0; chr <= UINT8_MAX; chr++)
+		if(const uint64_t freq = this->chars_freq_.get(chr))
 			pq.push(new huffman_leaf(freq, chr));
+
 
 	if(pq.size() == 1)
 	{

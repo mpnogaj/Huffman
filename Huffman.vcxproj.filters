@@ -24,6 +24,9 @@
     <ClCompile Include="huffman_encoder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="bit_file_io.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="argsParser.h">
@@ -35,5 +38,14 @@
     <ClInclude Include="huffman_encoder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="bit_file_io.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="consts.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="data.txt" />
   </ItemGroup>
 </Project>
