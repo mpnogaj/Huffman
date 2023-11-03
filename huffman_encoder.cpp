@@ -7,7 +7,7 @@
 #include "huffman_tree.h"
 #include "bit_file_io.h"
 
-static void write_file_header(const std::unordered_map<uint8_t, uint64_t> &freq_map, std::fstream &output_file);
+static void write_file_header(const freq_map &map, std::fstream &output_file);
 static std::pair<huffman_tree*, uint8_t> read_file_header(std::fstream &file);
 
 void huffman_encoder::compress_file() const
@@ -26,26 +26,25 @@ void huffman_encoder::compress_file() const
 	bit_file_io output_file_bit_io(output_file);
 
 	std::cout<<"Counting byte frequency..."<<std::endl;
-	std::unordered_map<uint8_t, uint64_t> freq_map;
+	freq_map map;
 	//https://stackoverflow.com/a/67854635
 	while (input_file.read(reinterpret_cast<char*>(this->buffer_), sizeof(uint8_t) * this->buffer_size_))
 	{
 		for(size_t i = 0; i < static_cast<size_t>(input_file.gcount()); i++)
 		{
 			uint8_t byte = this->buffer_[i];
-			if (freq_map.count(byte)) freq_map[byte]++;
-			else freq_map[byte] = 1;
+			map.inc(byte);
 		}
 	}
 	
 	std::cout<<"Finished counting"<<std::endl;
-	write_file_header(freq_map, output_file);
+	write_file_header(map, output_file);
 
 	input_file.clear(); //clear eof flag
 	input_file.seekg(0, std::ios_base::beg);
 
 	std::cout<<"Building huffman tree..."<<std::endl;
-	const huffman_tree *tree = new huffman_tree(freq_map);
+	const huffman_tree *tree = new huffman_tree(map);
 	auto codes = tree->calculate_codes();
 	std::cout<<"Tree created, and codes generated"<<std::endl;
 
@@ -112,29 +111,22 @@ void huffman_encoder::decompress_file() const
 	delete tree;
 }
 
-static void write_file_header(const std::unordered_map<uint8_t, uint64_t> &freq_map, std::fstream &output_file)
+static void write_file_header(const freq_map &map, std::fstream &output_file)
 {
 	uint8_t buf[2] = {
-		static_cast<uint8_t>(freq_map.size() - 1), //bytes_size + 1 = unique bytes count;
+		static_cast<uint8_t>(map.size() - 1), //bytes_size + 1 = unique bytes count;
 		0 // placeholder
 	};
 
 	output_file.write(reinterpret_cast<char*>(&buf), sizeof(buf));
 
-	std::vector<std::pair<uint8_t, uint64_t>> elems(freq_map.begin(), freq_map.end());
-
-	std::sort(elems.begin(), elems.end(),
-	          [](const std::pair<uint8_t, uint64_t> &p1, const std::pair<uint8_t, uint64_t> &p2) {
-		          if (p1.second == p2.second)
-			          return p1.first < p2.first;
-
-		          return p1.second > p2.second;
-	          });
-
-	for (auto &[chr, frq] : elems)
+	for (uint8_t chr = 0; chr <= UINT8_MAX; chr++)
 	{
-		output_file.write(reinterpret_cast<char*>(&chr), sizeof(uint8_t));
-		output_file.write(reinterpret_cast<char*>(&frq), sizeof(uint64_t));
+		if(uint64_t frq = map.get(chr))
+		{
+			output_file.write(reinterpret_cast<char*>(&chr), sizeof(uint8_t));
+			output_file.write(reinterpret_cast<char*>(&frq), sizeof(uint64_t));
+		}
 	}
 }
 
@@ -143,7 +135,7 @@ static std::pair<huffman_tree*, uint8_t> read_file_header(std::fstream &file)
 	uint8_t header[2];
 	file.read(reinterpret_cast<char*>(&header), sizeof(header));
 	const uint16_t unique_bytes = static_cast<uint16_t>(header[0]) + 1;
-	freq_map_t byte_freq;
+	freq_map map;
 	uint8_t byte = 0;
 	uint64_t count = 0;
 
@@ -152,8 +144,8 @@ static std::pair<huffman_tree*, uint8_t> read_file_header(std::fstream &file)
 	while (bytes_read < ((unique_bytes * 9) + 2) && file.read(reinterpret_cast<char*>(&byte), sizeof(uint8_t)) && file.read(reinterpret_cast<char*>(&count), sizeof(uint64_t)))
 	{
 		bytes_read += 9;
-		byte_freq[byte] = count;
+		map.set(byte, count);
 	}
 
-	return {new huffman_tree(byte_freq), header[1]};
+	return {new huffman_tree(map), header[1]};
 }

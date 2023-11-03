@@ -19,7 +19,7 @@ public:
 	{
 	}
 
-	~huffman_encoder() {delete buffer_;}
+	~huffman_encoder() {delete buffer_;};
 
 	void compress_file() const;
 	void decompress_file() const;

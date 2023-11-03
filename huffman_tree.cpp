@@ -9,16 +9,8 @@ static void fill_codes(huffman_node *root, std::unordered_map<uint8_t, std::vect
 static huffman_leaf* get_left_most_leaf(huffman_node* node);
 
 
-huffman_tree::huffman_tree(std::unordered_map<uint8_t, uint64_t> chars_freq) : chars_freq_(std::move(chars_freq))
+huffman_tree::huffman_tree(freq_map chars_freq) : chars_freq_(std::move(chars_freq))
 {
-	//special case
-	if(this->chars_freq_.size() == 1)
-	{
-		const auto& [chr, frq] = *this->chars_freq_.begin();
-		this->tree_root_ = new huffman_node(frq, new huffman_leaf(frq, chr), nullptr);
-		return;
-	}
-
 	//https://stackoverflow.com/a/5808171
 	//min heap comparator
 	auto comp = [](huffman_node *n1, huffman_node *n2) {
@@ -33,28 +25,31 @@ huffman_tree::huffman_tree(std::unordered_map<uint8_t, uint64_t> chars_freq) : c
 			{
 				return leaf1->get_value() > leaf2->get_value();
 			}
-			else if(leaf1 != nullptr)
+			if(leaf1 != nullptr)
 			{
 				return false;
 			}
-			else if(leaf2 != nullptr)
+			if(leaf2 != nullptr)
 			{
 				return true;
 			}
-			else
-			{
-				leaf1 = get_left_most_leaf(n1);
-				leaf2 = get_left_most_leaf(n2);
-				return leaf1->get_value() > leaf2->get_value();
-			}
+			leaf1 = get_left_most_leaf(n1);
+			leaf2 = get_left_most_leaf(n2);
+			return leaf1->get_value() > leaf2->get_value();
 		}
 		return freq1 > freq2;
 	};
 	std::priority_queue<huffman_node*, std::vector<huffman_node*>, decltype(comp)> pq(comp);
 
-	for (const auto& [chr, freq] : this->chars_freq_)
+	for (uint8_t chr = 0; chr <= UINT8_MAX; chr++)
+		if(uint64_t freq = this->chars_freq_.get(chr))
+			pq.push(new huffman_leaf(freq, chr));
+
+	if(pq.size() == 1)
 	{
-		pq.push(new huffman_leaf(freq, chr));
+		const auto node = pq.top();
+		pq.pop();
+		pq.push(new huffman_node(node->get_frequency(), node, nullptr));
 	}
 
 	while (pq.size() > 1)
@@ -109,14 +104,12 @@ static void fill_codes(huffman_node *root, std::unordered_map<uint8_t, std::vect
 		codes[leaf->get_value()] = std::move(current);
 		return;
 	}
-	else
-	{
-		auto cpy = std::vector<bool>(current);
-		current.push_back(false);
-		fill_codes(root->get_left_child(), codes, current);
-		cpy.push_back(true);
-		fill_codes(root->get_right_child(), codes, cpy);
-	}
+
+	auto cpy = std::vector<bool>(current);
+	current.push_back(false);
+	fill_codes(root->get_left_child(), codes, current);
+	cpy.push_back(true);
+	fill_codes(root->get_right_child(), codes, cpy);
 }
 
 static void delete_tree(const huffman_node *root)
