@@ -3,6 +3,8 @@
 #include <unordered_map>
 #include <vector>
 
+typedef std::unordered_map<uint8_t, uint64_t> freq_map_t;
+
 class huffman_node
 {
 private:
@@ -33,11 +35,12 @@ class huffman_tree
 {
 private:
 	huffman_node* tree_root_ = nullptr;
-	const std::unordered_map<uint8_t, uint64_t> chars_freq_;
+	const freq_map_t chars_freq_;
 public:
-	explicit huffman_tree(std::unordered_map<uint8_t, uint64_t> chars_freq);
+	huffman_tree(freq_map_t chars_freq);
 	~huffman_tree();
 
 	std::unordered_map<uint8_t, std::vector<bool>> calculate_codes() const;
+	bool try_get_byte(uint8_t &byte, uint8_t code_bit) const;
 };
 

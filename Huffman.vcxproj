@@ -128,14 +128,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="bit_file_io.cpp" />
     <ClCompile Include="huffman_encoder.cpp" />
     <ClCompile Include="huffman_tree.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="argsParser.h" />
+    <ClInclude Include="bit_file_io.h" />
     <ClInclude Include="huffman_encoder.h" />
     <ClInclude Include="huffman_tree.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="data.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -13,5 +13,6 @@ public:
 	{
 	};
 
-	void compress_file();
+	void compress_file() const;
+	void decompress_file() const;
 };

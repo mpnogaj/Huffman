@@ -10,6 +10,14 @@ static void fill_codes(huffman_node *root, std::unordered_map<uint8_t, std::vect
 
 huffman_tree::huffman_tree(std::unordered_map<uint8_t, uint64_t> chars_freq) : chars_freq_(std::move(chars_freq))
 {
+	//special case
+	if(this->chars_freq_.size() == 1)
+	{
+		const auto& [chr, frq] = *this->chars_freq_.begin();
+		this->tree_root_ = new huffman_node(frq, new huffman_leaf(frq, chr), nullptr);
+		return;
+	}
+
 	//https://stackoverflow.com/a/5808171
 	//min heap comparator
 	auto comp = [](huffman_node *n1, huffman_node *n2) {
@@ -60,6 +68,23 @@ std::unordered_map<uint8_t, std::vector<bool>> huffman_tree::calculate_codes() c
 	std::unordered_map<uint8_t, std::vector<bool>> codes;
 	fill_codes(this->tree_root_, codes, {});
 	return codes;
+}
+
+bool huffman_tree::try_get_byte(uint8_t& byte, uint8_t code_bit) const
+{
+	static huffman_node* current_node = this->tree_root_;
+	if (code_bit)
+		current_node = current_node->get_right_child();
+	else
+		current_node = current_node->get_left_child();
+
+	if(const auto leaf = dynamic_cast<huffman_leaf*>(current_node))
+	{
+		byte = leaf->get_value();
+		current_node = this->tree_root_;
+		return true;
+	}
+	return false;
 }
 
 static void fill_codes(huffman_node *root, std::unordered_map<uint8_t, std::vector<bool>>& codes,
