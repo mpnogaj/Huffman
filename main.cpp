@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
 		})
 	};
 
-	/*if (argc < 2)
+	if (argc < 2)
 		invalid_usage(program_name);
 
 	for (int i = 1; i < argc; i++)
@@ -94,17 +94,9 @@ int main(int argc, char *argv[])
 				option.get_function()(i);
 
 	if (mode == mode::INVALID)
-		invalid_usage(program_name);*/
+		invalid_usage(program_name);
 
-	mode = mode::DECOMPRESS;
 
-	auto program_opt2 = program_options("vid.mp4", "out.txt", mode::COMPRESS);
-	//auto program_opt = program_options("out.txt", "res.txt", mode::COMPRESS);
-	//auto encoder = huffman_encoder(program_opt);
-	auto encoder2 = huffman_encoder(program_opt2);
-
-	encoder2.compress_file();
-	//encoder.decompress_file();
 
 	return EXIT_SUCCESS;
 }
