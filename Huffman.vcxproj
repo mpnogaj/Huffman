@@ -129,16 +129,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="bit_file_io.cpp" />
+    <ClCompile Include="ui.cpp" />
     <ClCompile Include="huffman_encoder.cpp" />
     <ClCompile Include="huffman_tree.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="argsParser.h" />
     <ClInclude Include="bit_file_io.h" />
     <ClInclude Include="consts.h" />
     <ClInclude Include="huffman_encoder.h" />
     <ClInclude Include="huffman_tree.h" />
+    <ClInclude Include="ui.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="data.txt" />

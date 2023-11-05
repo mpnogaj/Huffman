@@ -2,6 +2,7 @@
 
 #include <queue>
 #include <utility>
+#include <stdexcept>
 
 static void delete_tree(const huffman_node *root);
 static huffman_leaf* get_left_most_leaf(huffman_node* node);
@@ -40,9 +41,11 @@ huffman_tree::huffman_tree(const freq_map& chars_freq) : chars_freq_(chars_freq)
 	std::priority_queue<huffman_node*, std::vector<huffman_node*>, decltype(comp)> pq(comp);
 
 	for (uint16_t chr = 0; chr <= UINT8_MAX; chr++)
-		if(const uint64_t freq = this->chars_freq_.get(chr))
-			pq.push(new huffman_leaf(freq, chr));
+		if(const uint64_t freq = this->chars_freq_.get(static_cast<uint8_t>(chr)))
+			pq.push(new huffman_leaf(freq, static_cast<uint8_t>(chr)));
 
+	if (pq.empty())
+		throw std::logic_error("Cannot create tree with 0 unique bytes.");
 
 	if(pq.size() == 1)
 	{
@@ -94,6 +97,8 @@ bool huffman_tree::try_get_byte(uint8_t& byte, uint8_t code_bit) const
 
 void huffman_tree::fill_codes(huffman_node *root, std::vector<uint8_t> current)
 {
+	if (root == nullptr) return;
+
 	if (const auto leaf = dynamic_cast<huffman_leaf*>(root))
 	{
 		this->codes_[leaf->get_value()] = std::move(current);
@@ -117,7 +122,12 @@ static void delete_tree(const huffman_node *root)
 
 static huffman_leaf* get_left_most_leaf(huffman_node* node)
 {
-	huffman_leaf *leaf = nullptr; 
+	if(node == nullptr)
+	{
+		throw std::logic_error("Unknown error. Cannot create tree");
+	}
+
+	huffman_leaf *leaf; 
 	while((leaf = dynamic_cast<huffman_leaf*>(node)) == nullptr)
 	{
 		node = node->get_left_child();
