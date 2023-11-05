@@ -16,6 +16,8 @@ bit_file_io::~bit_file_io()
 
 void bit_file_io::write_bit(uint8_t bit)
 {
+	bit &= 1;
+
 	if (bit)
 		this->w_bit_buf_ |= 1 << ((CHAR_BIT - 1) - this->w_bit_buf_size_);
 	this->w_bit_buf_size_++;
@@ -68,6 +70,17 @@ bool bit_file_io::read_bit(uint8_t &bit)
 	}
 
 	this->r_bit_buf_size_--;
-	bit = r_bit_buf_ & (1 << this->r_bit_buf_size_);
+	bit = r_bit_buf_ & (1 << this->r_bit_buf_size_) >> this->r_bit_buf_size_;
 	return true;
+}
+
+bit_file_io& bit_file_io::operator<<(const uint8_t bit)
+{
+	this->write_bit(bit);
+	return *this;
+}
+
+bool bit_file_io::operator>>(uint8_t& bit)
+{
+	return this->read_bit(bit);
 }

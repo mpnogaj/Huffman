@@ -38,6 +38,7 @@ huffman_encoder::~huffman_encoder()
 void huffman_encoder::compress_file()
 {
 	this->ui_.write_message("Starting compression...");
+	this->ui_.write_message("Output file: " + this->output_file_);
 	std::fstream input_file(this->input_file_, std::ios::in | std::ios_base::binary);
 
 	if (!input_file.good() || input_file.peek() == std::ifstream::traits_type::eof())
@@ -106,9 +107,7 @@ void huffman_encoder::compress_file()
 			uint8_t byte = this->buffer_[i];
 			auto& code = codes[byte];
 			for (bool bit : code)
-			{
-				output_file_bit_io.write_bit(bit);
-			}
+				output_file_bit_io << (bit ? 1 : 0);
 		}
 	}
 
@@ -160,7 +159,7 @@ void huffman_encoder::decompress_file()
 
 	this->ui_.write_message("Transforming bytes...");
 	uint8_t bit = 0, byte = 0;
-	while (input_file_bit_io.read_bit(bit))
+	while (input_file_bit_io >> byte)
 	{
 		if (tree->try_get_byte(byte, bit))
 		{
@@ -177,7 +176,7 @@ void huffman_encoder::decompress_file()
 	if (buffer_cnt_ > 0)
 	{
 		output_file.write(reinterpret_cast<char*>(this->buffer_),
-		                  static_cast<std::streamsize>(sizeof(uint8_t) * this->buffer_size_));
+		                  static_cast<std::streamsize>(sizeof(uint8_t) * this->buffer_cnt_));
 		this->buffer_cnt_ = 0;
 	}
 
@@ -208,7 +207,7 @@ static void write_file_header(const freq_map& map, const uint8_t padding, std::f
 	}
 
 	for (uint8_t i = 0; i < padding; i++)
-		wrapper.write_bit(0);
+		wrapper << 0;
 	//no need to flush it here
 	//flushing will cause problems
 }
@@ -233,7 +232,7 @@ static huffman_tree* read_file_header(std::fstream& file, bit_file_io& wrapper)
 	}
 
 	uint8_t bit;
-	for (uint8_t i = 0; i < header[1] && wrapper.read_bit(bit); i++)
+	for (uint8_t i = 0; i < header[1] && wrapper >> bit; i++)
 		;
 
 	return new huffman_tree(map);

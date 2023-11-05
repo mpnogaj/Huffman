@@ -25,4 +25,7 @@ public:
 	void flush_buffer();
 
 	bool read_bit(uint8_t &bit);
+
+	bit_file_io& operator<<(const uint8_t bit);
+	bool operator>>(uint8_t& bit);
 };

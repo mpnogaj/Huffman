@@ -66,9 +66,10 @@ int main(int argc, char* argv[])
 			{
 				std::stringstream ss;
 
-				ss << "Running: " << program_name << " [OPTIONS] " << mode_compress << "|" << mode_decompress;
+				ss << "Running: " << program_name << " [OPTIONS]";
 				console_ui.write_message(ss.str());
-				ss.clear();
+				//https://stackoverflow.com/a/20792
+				ss.str(std::string());
 
 				console_ui.write_message("Options: ");
 
@@ -77,7 +78,7 @@ int main(int argc, char* argv[])
 					ss << "\t" << option.get_short_name() << ", " << option.get_long_name() << " - " << option.
 						get_description();
 					console_ui.write_message(ss.str());
-					ss.clear();
+					ss.str(std::string());
 				}
 				exit(EXIT_SUCCESS);
 			}),
@@ -95,7 +96,7 @@ int main(int argc, char* argv[])
 				output_file = std::string(argv[i + 1]);
 				i++;
 			}),
-			option("-m", "--mode", "Compression algorithm mode [required]", [argc, argv, &mode](int& i)
+			option("-m", "--mode", "Compression algorithm mode <compress|decompress> [required]", [argc, argv, &mode](int& i)
 			{
 				if (i + 1 >= argc)
 					console_ui.app_error("Mode not specified");
