@@ -6,7 +6,6 @@
 #include "consts.h"
 #include "ui.h"
 
-
 class huffman_encoder
 {
 private:

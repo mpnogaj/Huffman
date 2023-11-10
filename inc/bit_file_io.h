@@ -3,6 +3,9 @@
 #include <cstdint>
 #include <fstream>
 
+/**
+ * @brief Wrapper around std::fstream for writing/reading bits to/from file
+ */
 class bit_file_io
 {
   private:
@@ -22,10 +25,28 @@ class bit_file_io
                 size_t write_buff_size);
     ~bit_file_io();
 
+	/**
+	 * @brief Writes single bit, bit & 1
+	 * @param bit bit
+	 */
     void write_bit(uint8_t bit);
+
+	/**
+	 * @brief Causes bit buffer to be flushed
+	 */
     void flush_bit_buffer();
+
+	/**
+	 * @brief Flushes buffer to file
+	 */
     void flush_buffer();
 
+	/**
+	 * @brief Reads single bit from file
+	 * @param bit read bit
+	 * @return true when bit is read
+	 * @return false when bit is not read
+	 */
     bool read_bit(uint8_t &bit);
 
     bit_file_io &operator<<(const uint8_t bit);

@@ -31,7 +31,7 @@ void bit_file_io::write_bit(uint8_t bit)
 }
 
 /**
- * \brief Causes w_bit_buf_ to be saved to w_buff_. If w_buff_ achieves max size
+ * @brief Causes w_bit_buf_ to be saved to w_buff_. If w_buff_ achieves max size
  * it's being flushed
  */
 void bit_file_io::flush_bit_buffer()

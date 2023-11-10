@@ -3,8 +3,10 @@
 #include <unordered_map>
 #include <vector>
 
-//typedef std::unordered_map<uint8_t, uint64_t> freq_map_t;
 
+/**
+ * @brief Helper class for storing byte frequency`
+ */
 class freq_map
 {
 private:
@@ -13,10 +15,34 @@ private:
 public:
 	freq_map(): freq_(std::vector<uint64_t>(UINT8_MAX + 1, 0)) {}
 
+	/**
+	 * @brief Gets count of the given byte
+	 * 
+	 * @param byte byte
+	 * @return uint64_t byte count
+	 */
 	uint64_t get(uint8_t byte) const { return freq_[byte]; }
+	
+	/**
+	 * @brief Sets byte count to given value
+	 * 
+	 * @param byte byte 
+	 * @param value count
+	 */
 	void set(uint8_t byte, uint64_t value) {freq_[byte] = value; }
+	
+	/**
+	 * @brief Increments byte count
+	 * 
+	 * @param byte byte
+	 */
 	void inc(uint8_t byte) { ++freq_[byte]; }
 
+	/**
+	 * @brief Gets count of stored bytes (unique bytes count)
+	 * 
+	 * @return uint16_t count
+	 */
 	uint16_t size() const
 	{
 		uint16_t cnt = 0;
@@ -27,6 +53,9 @@ public:
 	};
 };
 
+/**
+ * @brief Huffman tree node. Containing frequency info
+ */
 class huffman_node
 {
 private:
@@ -42,6 +71,9 @@ public:
 	huffman_node* get_right_child() const { return this->right_node_; }
 };
 
+/**
+ * @brief Huffman tree leaf. Contains frequency and stored value
+ */
 class huffman_leaf : public huffman_node
 {
 private:
@@ -52,7 +84,9 @@ public:
 	uint8_t get_value() const { return this->value_; }
 };
 
-
+/**
+ * @brief Huffman tree representation
+ */
 class huffman_tree
 {
 private:

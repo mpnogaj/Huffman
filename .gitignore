@@ -1,10 +1,17 @@
-.git
-
-obj/
-
 # ignore all files without extension
 * 
 !*.*
 !/**/
 # allow makefile
 !Makefile
+
+.git/
+.cache/
+
+docs/
+
+obj/
+
+compile_commands.json
+
+
