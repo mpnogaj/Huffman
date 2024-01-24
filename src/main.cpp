@@ -4,10 +4,10 @@
 #include <sstream>
 #include <vector>
 
-#include "consts.h"
-#include "huffman_encoder.h"
-#include "huffman_tree.h"
-#include "ui.h"
+#include "../inc/consts.h"
+#include "../inc/huffman_encoder.h"
+#include "../inc/huffman_tree.h"
+#include "../inc/ui.h"
 
 static const console_ui console_ui;
 

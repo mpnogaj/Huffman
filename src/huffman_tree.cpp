@@ -1,4 +1,4 @@
-#include "huffman_tree.h"
+#include "../inc/huffman_tree.h"
 
 #include <queue>
 #include <stdexcept>
@@ -7,6 +7,7 @@
 static void delete_tree(const huffman_node *root);
 static huffman_leaf *get_left_most_leaf(huffman_node *node);
 
+//constructs huffman tree from bytes frequency
 huffman_tree::huffman_tree(const freq_map &chars_freq) : chars_freq_(chars_freq)
 {
     // https://stackoverflow.com/a/5808171
@@ -42,7 +43,7 @@ huffman_tree::huffman_tree(const freq_map &chars_freq) : chars_freq_(chars_freq)
     };
     std::priority_queue<huffman_node *, std::vector<huffman_node *>,
                         decltype(comp)>
-        pq(comp);
+	pq(comp);
 
     for (uint16_t chr = 0; chr <= UINT8_MAX; chr++)
         if (const uint64_t freq =
@@ -101,6 +102,8 @@ bool huffman_tree::try_get_byte(uint8_t &byte, uint8_t code_bit) const
     return false;
 }
 
+//fill codes array with corresponding codes
+//code_[x] -> huffman code for byte x
 void huffman_tree::fill_codes(huffman_node *root, std::vector<uint8_t> current)
 {
     if (root == nullptr)
@@ -119,6 +122,7 @@ void huffman_tree::fill_codes(huffman_node *root, std::vector<uint8_t> current)
     fill_codes(root->get_right_child(), cpy);
 }
 
+//cleanup tree
 static void delete_tree(const huffman_node *root)
 {
     if (root == nullptr)

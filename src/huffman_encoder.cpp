@@ -1,8 +1,8 @@
-﻿#include "huffman_encoder.h"
+﻿#include "../inc/huffman_encoder.h"
 
-#include "bit_file_io.h"
-#include "huffman_tree.h"
-#include "ui.h"
+#include "../inc/bit_file_io.h"
+#include "../inc/huffman_tree.h"
+#include "../inc/ui.h"
 #include <algorithm>
 #include <climits>
 #include <fstream>
@@ -37,6 +37,7 @@ void huffman_encoder::compress_file()
     std::fstream input_file(this->input_file_,
                             std::ios::in | std::ios_base::binary);
 
+	//checking input and output files
     if (!input_file.good() ||
         input_file.peek() == std::ifstream::traits_type::eof())
     {
@@ -59,6 +60,7 @@ void huffman_encoder::compress_file()
 
     this->ui_.write_message("Counting byte frequency...");
 
+	//read and count bytes from file
     freq_map map;
     // https://stackoverflow.com/a/67854635
 
@@ -78,25 +80,34 @@ void huffman_encoder::compress_file()
     this->ui_.write_message("Finished counting bytes.");
 
     this->ui_.write_message("Building huffman tree...");
+	//create a huffman tree and create codes for each byte
     const huffman_tree *tree = new huffman_tree(map);
     auto codes = tree->get_codes();
     this->ui_.write_message("Tree created, and codes generated.");
 
+	//code may not be length mult of 8
+	//in this case we should add padding before code
     // calculate needed padding
     uint8_t padding = 0;
     for (uint16_t i = 0; i <= UINT8_MAX; i++)
-        padding = (padding + ((codes[i].size() % CHAR_BIT) *
-                              (map.get(static_cast<uint8_t>(i)) % CHAR_BIT)) %
-                                 CHAR_BIT) %
-                  CHAR_BIT;
+    {
+		padding = (padding + ((codes[i].size() % CHAR_BIT) *
+			(map.get(static_cast<uint8_t>(i)) % CHAR_BIT)) %
+			CHAR_BIT) %
+			CHAR_BIT;
+    }
 
+
+	padding = padding > 0 ? CHAR_BIT - padding : 0;
     this->ui_.write_message("Writing file header...");
-    write_file_header(map, CHAR_BIT - padding, output_file, output_file_bit_io);
+	//create and write header to file
+    write_file_header(map, padding, output_file, output_file_bit_io);
     this->ui_.write_message("File header written.");
 
     input_file.clear(); // clear eof flag
     input_file.seekg(0, std::ios_base::beg);
 
+	//write code to file
     this->ui_.write_message("Encoding bytes...");
     while (input_file.good())
     {
@@ -113,6 +124,7 @@ void huffman_encoder::compress_file()
         }
     }
 
+	//flush buffers
     output_file_bit_io.flush_bit_buffer();
     output_file_bit_io.flush_buffer();
 
@@ -128,6 +140,7 @@ void huffman_encoder::decompress_file()
 {
     this->ui_.write_message("Starting decompression...");
 
+	//check input output files
     std::fstream input_file(this->input_file_,
                             std::ios::in | std::ios_base::binary);
     if (!input_file.good() ||
@@ -150,6 +163,7 @@ void huffman_encoder::decompress_file()
     }
 
     this->ui_.write_message("Reading file header and rebuilding tree...");
+	//read file header and construct tree from it
     const huffman_tree *tree;
     try
     {
@@ -163,8 +177,10 @@ void huffman_encoder::decompress_file()
     this->ui_.write_message("Tree created.");
 
     this->ui_.write_message("Transforming bytes...");
+	//read code bit by bit, and assemble bytes
+	//then write decompressed bytes to the output file
     uint8_t bit = 0, byte = 0;
-    while (input_file_bit_io >> byte)
+    while (input_file_bit_io >> bit)
     {
         if (tree->try_get_byte(byte, bit))
         {
@@ -179,6 +195,7 @@ void huffman_encoder::decompress_file()
         }
     }
 
+	//flush buffer
     if (buffer_cnt_ > 0)
     {
         output_file.write(
@@ -200,11 +217,12 @@ static void write_file_header(const freq_map &map, const uint8_t padding,
     uint8_t buf[2] = {
         static_cast<uint8_t>(map.size() -
                              1), // bytes_size + 1 = unique bytes count;
-        padding                  // needed padding
+        padding                  // needed padding for huffman code
     };
 
     output_file.write(reinterpret_cast<char *>(&buf), sizeof(buf));
 
+	//write bytes frequency
     for (uint16_t chr = 0; chr <= UINT8_MAX; chr++)
     {
         if (uint64_t frq = map.get(static_cast<uint8_t>(chr)))
@@ -214,24 +232,32 @@ static void write_file_header(const freq_map &map, const uint8_t padding,
         }
     }
 
+	//add padding bytes
     for (uint8_t i = 0; i < padding; i++)
         wrapper << 0;
     // no need to flush it here
     // flushing will cause problems
+	// because we will write more zeros
 }
 
 static huffman_tree *read_file_header(std::fstream &file, bit_file_io &wrapper)
 {
     uint8_t header[2];
     // header[0] -> num of unique bytes - 1
-    // header[1] -> padding at the end
+    // header[1] -> code padding
+
+	//read header to header array
     file.read(reinterpret_cast<char *>(&header), sizeof(header));
     const uint16_t unique_bytes = static_cast<uint16_t>(header[0]) + 1;
     freq_map map;
-    uint8_t byte = 0;
+
+	uint8_t byte = 0;
     uint64_t count = 0;
+
+	//how many bytes are read
     uint16_t bytes_read = 2;
 
+	//read bytes frequency
     while (bytes_read < ((unique_bytes * 9) + 2) &&
            file.read(reinterpret_cast<char *>(&byte), sizeof(uint8_t)) &&
            file.read(reinterpret_cast<char *>(&count), sizeof(uint64_t)))
@@ -240,9 +266,11 @@ static huffman_tree *read_file_header(std::fstream &file, bit_file_io &wrapper)
         map.set(byte, count);
     }
 
+	//read padding bits
     uint8_t bit;
     for (uint8_t i = 0; i < header[1] && wrapper >> bit; i++)
         ;
 
+	//construct tree
     return new huffman_tree(map);
 }
