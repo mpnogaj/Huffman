@@ -21,13 +21,6 @@ huffman_encoder::huffman_encoder(std::string input_file,
 {
 }
 
-huffman_encoder::huffman_encoder(const huffman_encoder &cpy)
-    : input_file_(cpy.input_file_), output_file_(cpy.output_file_),
-      ui_(cpy.ui_), buffer_(new uint8_t[cpy.buffer_size_]),
-      buffer_size_(cpy.buffer_size_)
-{
-}
-
 huffman_encoder::~huffman_encoder() { delete[] buffer_; }
 
 void huffman_encoder::compress_file()
