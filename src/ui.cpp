@@ -1,4 +1,4 @@
-﻿#include "ui.h"
+﻿#include "../inc/ui.h"
 
 #include <iostream>
 

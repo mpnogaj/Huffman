@@ -1,12 +1,12 @@
-﻿#include "bit_file_io.h"
+﻿#include "../inc/bit_file_io.h"
 
 #include <climits>
 
 bit_file_io::bit_file_io(std::fstream &file_stream, size_t read_buff_size,
                          size_t write_buff_size)
     : file_stream_(file_stream),
-      r_buff_size_(std::min(read_buff_size, static_cast<size_t>(1))),
-      w_buff_size_(std::min(write_buff_size, static_cast<size_t>(1)))
+      r_buff_size_(std::max(read_buff_size, static_cast<size_t>(1))),
+      w_buff_size_(std::max(write_buff_size, static_cast<size_t>(1)))
 {
     r_buff_ = new uint8_t[r_buff_size_];
     w_buff_ = new uint8_t[w_buff_size_];
@@ -48,7 +48,7 @@ void bit_file_io::flush_bit_buffer()
 }
 
 /**
- * \brief Causes w_buff_ to be written to file. Any data in w_bit_buf_ is
+ * @brief Causes w_buff_ to be written to file. Any data in w_bit_buf_ is
  * ignored
  */
 void bit_file_io::flush_buffer()
@@ -61,25 +61,31 @@ void bit_file_io::flush_buffer()
     this->w_buff_cnt_ = 0;
 }
 
+/**
+ * @brief Reads single bit from file
+ */
 bool bit_file_io::read_bit(uint8_t &bit)
 {
-    if (this->r_bit_buf_size_ == 0)
+	if (this->r_bit_buf_size_ == 0)
     {
-        if (this->r_buff_cnt_ == 0)
+	    static size_t r_buff_pos = 0;
+	    if (r_buff_pos == this->r_buff_cnt_)
         {
-            if (!this->file_stream_.read(
-                    reinterpret_cast<char *>(this->r_buff_),
-                    this->r_buff_size_))
-                return false;
+			this->file_stream_.read(
+				reinterpret_cast<char*>(this->r_buff_),
+				static_cast<std::streamsize>(sizeof(uint8_t) * this->r_buff_size_));
             this->r_buff_cnt_ = this->file_stream_.gcount();
+			if (this->r_buff_cnt_ == 0) 
+				return false;
+			r_buff_pos = 0;
         }
 
-        this->r_bit_buf_ = this->r_buff_[--r_buff_cnt_];
+        this->r_bit_buf_ = this->r_buff_[r_buff_pos++];
         this->r_bit_buf_size_ = CHAR_BIT;
     }
 
     this->r_bit_buf_size_--;
-    bit = r_bit_buf_ & (1 << this->r_bit_buf_size_) >> this->r_bit_buf_size_;
+    bit = (r_bit_buf_ & (1 << this->r_bit_buf_size_)) >> this->r_bit_buf_size_;
     return true;
 }
 
