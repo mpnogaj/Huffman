@@ -4,7 +4,8 @@
 #include <fstream>
 
 /**
- * @brief Wrapper around std::fstream for writing/reading bits to/from file
+ * @brief Klasa opakowująca std::fstream. Umożliwia pisanie i czytanie, z i do
+ * pliku, pojedyczych bitów
  */
 class bit_file_io
 {
@@ -25,28 +26,28 @@ class bit_file_io
                 size_t write_buff_size);
     ~bit_file_io();
 
-	/**
-	 * @brief Writes single bit, bit & 1
-	 * @param bit bit
-	 */
+    /**
+     * @brief Pisze pojedynczy bit do pliku.
+     * @param bit - bit który zostanie wypisany do pliku
+     */
     void write_bit(uint8_t bit);
 
-	/**
-	 * @brief Causes bit buffer to be flushed
-	 */
+    /**
+     * @brief Powoduje wypisanie i wyczyszczenie buforu bitów
+     */
     void flush_bit_buffer();
 
-	/**
-	 * @brief Flushes buffer to file
-	 */
+    /**
+     * @brief Powoduje wypisanie i wyczyszczenie buforu
+     */
     void flush_buffer();
 
-	/**
-	 * @brief Reads single bit from file
-	 * @param bit read bit
-	 * @return true when bit is read
-	 * @return false when bit is not read
-	 */
+    /**
+     * @brief Przeczytaj pojedynczy bit z pliku
+     * @param[out] bit - bit który zostanie przeczytany
+     * @return true - kiedy bit został przeczytany
+     * @return false - kiedy nie ma już bitów do przeczytania
+     */
     bool read_bit(uint8_t &bit);
 
     bit_file_io &operator<<(const uint8_t bit);

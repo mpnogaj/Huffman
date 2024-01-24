@@ -21,6 +21,9 @@ enum class mode
     DECOMPRESS,
 };
 
+/**
+ * @brief Klasa reprezentująca opcje wiersza linii poleceń
+ */
 class option
 {
   private:
@@ -30,6 +33,15 @@ class option
     const std::function<void(int &)> function_;
 
   public:
+    /**
+     * @brief Tworzy nowy obiekt opcji
+     *
+     * @param short_name - krótka nazwa
+     * @param long_name - długa nazwa
+     * @param description - opis
+     * @param function - akcja która zostanie wywołana kiedy przełącznik
+     * zostanie wykryty
+     */
     option(std::string short_name, std::string long_name,
            std::string description, std::function<void(int &)> function)
         : short_name_(std::move(short_name)), long_name_(std::move(long_name)),
@@ -45,6 +57,14 @@ class option
         return this->function_;
     }
 
+    /**
+     * @brief Funkcja sprawdzająca czy candidate jest równy short_name lub
+     * long_name
+     *
+     * @param candidate - kandydat
+     * @return true - kandydat odpowiada short_name lub long_name
+     * @return false - jeżeli kandydat nie odpowiada short_name i long_name
+     */
     bool matches(const std::string &candidate) const
     {
         return this->get_long_name() == candidate ||
